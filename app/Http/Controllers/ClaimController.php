@@ -1182,7 +1182,7 @@ class ClaimController extends Controller
         $mpdf = new \Mpdf\Mpdf(['tempDir' => base_path('resources/fonts/')]);
         $mpdf->WriteHTML('
         <div style="text-align: right; font-weight: bold; ">
-            <img src="'.asset("images/header-aia.jpg").'" alt="head">
+            <img src="'.asset("images/header.jpg").'" alt="head">
         </div>');
         $mpdf->WriteHTML( 
             '<div style="padding-top: 20px">'
