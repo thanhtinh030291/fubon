@@ -1773,7 +1773,7 @@ class ClaimController extends Controller
 
         //save CSR
         $CsrFile = $claim->CsrFile->where('rpct_oid','VN_CLSETTRPT01_OC')->first();
-        $url_csr = storage_path("../../vnaiaprod" . $CsrFile->path . $CsrFile->filename);
+        $url_csr = storage_path("../../fubonprod_hbs_report" . $CsrFile->path . $CsrFile->filename);
         $count_page = $mpdf->SetSourceFile($url_csr);
         for ($i = 1; $i <= $count_page-1; $i++) {
             $mpdf->AddPage('L');
@@ -1805,9 +1805,9 @@ class ClaimController extends Controller
 
         $claim  = Claim::itemClaimReject()->findOrFail($id);
         $CsrFile = $claim->CsrFile->where('rpid_oid',$request->rpid_oid)->first();
-        $url_csr = storage_path("../../vnaiaprod" . $CsrFile->path . $CsrFile->filename);
+        $url_csr = storage_path("../../fubonprod_hbs_report" . $CsrFile->path . $CsrFile->filename);
         $mpdf = new \Mpdf\Mpdf(['tempDir' => base_path('resources/fonts/')]);
-        $pagecount = $mpdf->SetSourceFile(storage_path("../../vnaiaprod" . $CsrFile->path . $CsrFile->filename));
+        $pagecount = $mpdf->SetSourceFile(storage_path("../../fubonprod_hbs_report" . $CsrFile->path . $CsrFile->filename));
         $pagecount = $pagecount -1;
         $file_name_cat =  md5(Str::random(14).time());
         $path_file_name_cat = storage_path("app/public/cache/$file_name_cat");
