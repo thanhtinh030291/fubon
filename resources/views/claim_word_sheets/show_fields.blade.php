@@ -4,7 +4,7 @@
         <thead>
             <tr>
                 <th>
-                    DLVN Claim
+                    Fubon Claim
                 </th>
             </tr>
         </thead>
