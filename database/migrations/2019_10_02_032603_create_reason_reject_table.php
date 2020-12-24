@@ -17,7 +17,7 @@ class CreateReasonRejectTable extends Migration
             $table->bigIncrements('id');
             $table->string('name', 500);
             $table->integer('term_id')->nullable();
-            $table->longText('template')->nullable();
+            $table->longText('template');
             $table->integer('created_user');
             $table->integer('updated_user');
             $table->timestamps();

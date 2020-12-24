@@ -4,14 +4,14 @@
         <thead>
             <tr>
                 <th>
-                    Fubon Claim
+                    CaThay Claim
                 </th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>
-                    {{$claim->mantis_id}}
+                    {{$claim->barcode}}
                 </td>
             </tr>
         </tbody>
@@ -19,38 +19,32 @@
 </div>
 <div class="row mt-5">
     <div class="col-md-4">
-    <p class="font-weight-bold">Name: {{$member->mbr_last_name ." " . $member->mbr_first_name}}</p>
+    <p class="font-weight-bold">Insured Person: {{$member->mbr_last_name ." " . $member->mbr_first_name}}</p>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
     <p class="font-weight-bold">DOB: {{ Carbon\Carbon::parse($member->dob)->format('d/m/Y') }}</p>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-2">
     <p class="font-weight-bold">Sex: {{str_replace("SEX_", "",$member->scma_oid_sex)}}</p>
     </div>
+    <div class="col-md-3">
+        <p class="font-weight-bold">Member No.: {{$member->mbr_no}}</p>
+        </div>
 </div>
 
 <div class="row">
     <div class="col-md-4">
-    <p class="font-weight-bold">Policy No: {{$HBS_CL_CLAIM->Police->pocy_ref_no}}</p>
+    <p class="font-weight-bold">Policy Holder: {{$HBS_CL_CLAIM->policyHolder->poho_name_1}}</p>
     </div>
     <div class="col-md-4">
-    <p class="font-weight-bold">Member No: {{ $member->memb_ref_no}}</p>
+    <p class="font-weight-bold">Policy Effective Date: {{ $member->pocyEffdate}}</p>
     </div>
     <div class="col-md-4">
-    <p class="font-weight-bold">Claim No.: {{$claim->code_claim_show}}</p>
+    <p class="font-weight-bold">Member Effective Date: {{ Carbon\Carbon::parse($member->eff_date)->format('d/m/Y')}}</p>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-6">
-    <p class="font-weight-bold">Effective date: {{$member->pocyEffdate}}</p>
-    </div>
-    <div class="col-md-6">
-    <p class="font-weight-bold">Status:  
-        {!! Form::textarea('status_online_query', $claimWordSheet->status_online_query ,['class' => 'editor_not_menu' , 'rows' => "3"]) !!}
-    </p>
-    </div>
-</div>
+
 <div class="row">
     <div class="col-md-6">
         <p class="font-weight-bold">Plan: </p>
@@ -61,24 +55,10 @@
         </div>
     </div>
     <div class="col-md-6">
-        <div class="form-check form-check-inline">
-            {{ Form::hidden('30_day', '0')}}
-            {{ Form::checkbox('30_day', '1', $claimWordSheet['30_day'] == 1? true : false , ['class' => 'form-check-input'])}}
-            <label class="form-check-label" for="inlineCheckbox1">- 30 ngày chờ</label>
-        </div><br>
-        <div class="form-check form-check-inline">
-            {{ Form::hidden('1_year', '0')}}
-            {{ Form::checkbox('1_year', '1', $claimWordSheet['1_year'] == 1? true : false , ['class' => 'form-check-input'])}}
-            <label class="form-check-label" for="inlineCheckbox1">- 1 năm chờ</label>
-        </div><br>
-        <div class="form-check form-check-inline">
-            {{ Form::hidden('contract_rule', '0')}}
-            {{ Form::checkbox('contract_rule', '1', $claimWordSheet['contract_rule'] == 1? true : false , ['class' => 'form-check-input'])}}
-            <label class="form-check-label" for="inlineCheckbox1">- Hợp đồng/Điều khoản</label>
-        </div>
-        
+    <p class="font-weight-bold">Broker/Frontliner: {{data_get($HBS_CL_CLAIM->broker,'brkr_name_1')}} / {{data_get($HBS_CL_CLAIM->Frontliner,'brkr_name_1', "None")}}</p>
     </div>
 </div>
+
 <div>
     <p class="font-weight-bold">Occupation Loading: 
         @foreach ($member->occupation as $item)
@@ -90,7 +70,7 @@
     </p>
     <p><span  class="font-weight-bold">Exclusion:</span> 
         @php
-        $exclu = $member->MrMemberEvent->where('scma_oid_event_code', 'EVENT_CODE_EXCL');
+            $exclu = $member->MrMemberEvent->where('scma_oid_event_code', 'EVENT_CODE_EXCL');
         @endphp
         @foreach ($exclu as $item)
             <p>{{$item->event_desc}}--({{$item->event_date}})</p>
@@ -153,7 +133,7 @@
                 <tr>
                     <td>{{Carbon\Carbon::parse($item->incur_date_from)->format('d/m/Y') .' - '.Carbon\Carbon::parse($item->incur_date_to)->format('d/m/Y')}}</td>
                     <td>{{$item->RT_DIAGNOSIS->diag_desc_vn}}</td>
-                    <td>{{str_replace("BENEFIT_TYPE_", "", $item->PD_BEN_HEAD->scma_oid_ben_type)}} - {{$item->PD_BEN_HEAD->ben_head}} </td>
+                    <td>{{str_replace("BENEFIT_TYPE_", "", isset($item->PD_BEN_HEAD->scma_oid_ben_type) ? $item->PD_BEN_HEAD->scma_oid_ben_type : "" )}} - {{isset($item->PD_BEN_HEAD->ben_head) ? $item->PD_BEN_HEAD->ben_head : ""}} </td>
                     <td>{{formatPrice($item->app_amt)}}</td>
                 </tr>
             @endforeach
@@ -162,6 +142,8 @@
         </tbody>
     </table>
 </div>
+
+
 
 <div>
     <p class="font-weight-bold">MEMBER CLAIM EVENT</p>
@@ -190,7 +172,7 @@
             <div class="row">
                 <p class="col-md-1">BENEFIT </p> 
                 <div class="col-md-2">
-                    {{ Form::select('_benefit[content]', config('constants.benefit'),null, ["id" =>"benefit_content",'class'=>" select2 form-control " ]) }} 
+                    {{ Form::select('_benefit[content]', $benefit,null, ["id" =>"benefit_content",'class'=>" select2 form-control " ]) }} 
                 </div>
                 {{ Form::text('_type_of_visit[to]', '' , ["id" =>"benefit_to",'class'=>"imask-input form-control col-md-2" ]) }}
                 {{ Form::text('_benefit[amount]', null, ["id" =>"benefit_amount",'class'=>"item-price form-control col-md-2 "]) }}
@@ -229,7 +211,7 @@
             <div id="clone_benefit" style="display: none">
                 <div class = "row mt-2">
                     <div class="col-sm-6">
-                        {{ Form::select('_benefit[content]', config('constants.benefit'),null, ['class'=>" _select2 form-control " ]) }}
+                        {{ Form::select('_benefit[content]', $benefit, null, ['class'=>" _select2 form-control " ]) }}
                     </div>
                     {{ Form::text('_benefit[amount]', null, ['class'=>"item-price form-control col-sm-5 benefit_input", 'onchange' => 'add_amt()']) }}
                     <button type="button" class="col-md-1 remove_field_btn btn btn-danger">X</>
@@ -243,10 +225,10 @@
     </div>
     <div class="row ml-1">
         <div class="col-md-6">
-            CLAIM AMT {{ Form::text('claim_amt', $HBS_CL_CLAIM->SumPresAmt, [ 'class'=>"item-price form-control col-sm-5", 'readonly']) }}
+            CLAIM AMT {{ Form::text('claim_amt', $claimWordSheet->claim_amt, [ 'id' => 'claim_amt' ,'class'=>"item-price form-control col-sm-5", 'readonly']) }}
         </div>
         <div class="col-md-6">
-            PAYABLE AMT {{ Form::text('payable_amt', $HBS_CL_CLAIM->SumAppAmt, ['class'=>"item-price form-control col-sm-5", 'readonly']) }}
+            PAYABLE AMT {{ Form::text('payable_amt', $claimWordSheet->payable_amt, ['id' => 'payable_amt' ,'class'=>"item-price form-control col-sm-5", 'readonly']) }}
         </div>
     </div>
     
@@ -375,6 +357,7 @@
         </div>
     </div>
 </div><br>
+
 <div>
     <p class="font-weight-bold">Status : {{ data_get(config("constants.statusWorksheet"), $claimWordSheet->status)}}</p>
     <p class="text-danger">Vui lòng lưu lại trước khi tải work sheet về máy hoặc lưu worksheet vào tệp đã sắp sếp  !!!!</p>
@@ -390,25 +373,6 @@
     </div>
 </div><br>
 
-<div class="modal fade bd-example-modal-lg" id="onlineQueryModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Online Query</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-        </div>
-        <div class="modal-body" id="rerulf_online_query" style="max-height: 350px; overflow: scroll;">
-            {{-- <pre>
-                {!!print("<pre>". print_r(json_decode(trim($member->queryOnline),true)) . "</pre>")!!}
-            </pre> --}}
-            <div id="jsonViewer"></div>
-        </div>
-        <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        </div>
-    </div>
-    </div>
-</div>
+
+
 

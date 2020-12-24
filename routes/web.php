@@ -36,6 +36,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('{claim_type}/claim/{claim}/edit', 'ClaimController@edit')->name('claimGOP.edit');
 
         Route::post('/claim/uploadSortedFile/{id}', 'ClaimController@uploadSortedFile')->name('uploadSortedFile');
+        Route::post('/claim/uploadSortedFileGOP/{id}', 'ClaimController@uploadSortedFileGOP')->name('uploadSortedFileGOP');
         Route::post('/claim/sendSortedFile/{id}', 'ClaimController@sendSortedFile')->name('claim.sendSortedFile');
         Route::post('/claim/setPcvExpense/{id}', 'ClaimController@setPcvExpense')->name('claim.setPcvExpense');
         Route::post('/claim/sendPayment/{id}', 'ClaimController@sendPayment')->name('claim.sendPayment');
@@ -47,6 +48,8 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/claim/sendCSRFile/{id}', 'ClaimController@sendCSRFile')->name('claim.sendCSRFile');
         Route::post('/claim/deletePage/{id}', 'ClaimController@deletePage')->name('claim.deletePage');
         Route::post('/claim/downloadFinishFile/{id}', 'ClaimController@downloadFinishFile')->name('claim.downloadFinishFile');
+        Route::post('/claim/confirmContract', 'ClaimController@confirmContract')->name('claim.confirmContract');
+        Route::post('/claim/setJetcase/{id}', 'ClaimController@setJetcase')->name('claim.setJetcase');
         
         
         Route::get('/claim/barcode/{barcode}', 'ClaimController@barcode_link');
@@ -63,6 +66,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/sendEtalk','ClaimController@sendEtalk')->name('sendEtalk');
         Route::post('/changeStatusEtalk','ClaimController@changeStatusEtalk')->name('changeStatusEtalk');
         Route::get('/sendSummaryEtalk/{id}',  'ClaimController@sendSummaryEtalk')->name('sendSummaryEtalk');
+        Route::post('/attachEmail/{id}',  'ClaimController@attachEmail')->name('attachEmail');
 
         
         Route::post('/addNote','ClaimController@addNote')->name('addNote');
@@ -126,7 +130,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('setting/notifiAllUser','SettingController@notifiAllUser')->middleware(['role:Admin']);
         Route::post('setting/checkUpdateClaim','SettingController@checkUpdateClaim')->middleware(['role:Admin']);
         Route::post('setting/checkUpdateLogApproved','SettingController@checkUpdateLogApproved')->middleware(['role:Admin']);
-
+        Route::post('setting/updateBenhead','SettingController@updateBenhead')->middleware(['role:Admin']);
         Route::resource('uncSign', 'UncSignController');
 
         //payment Histor
@@ -135,6 +139,9 @@ Route::group(['prefix' => 'admin'], function () {
 
         //provider
         Route::resource('providers', 'ProviderController');
+
+        //Group mem
+        Route::resource('groupUsers', 'GroupUserController');
         
     });
 
@@ -162,3 +169,4 @@ Route::post(
 Route::post('check_subscriptions', 'PushController@check_subscriptions');
 Route::post('subscriptions', 'PushController@update');
 Route::post('subscriptions/delete', 'PushController@destroy');
+

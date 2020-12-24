@@ -11,6 +11,7 @@ $totalAmount = 0;
     <link href="{{asset('css/ckeditor.css?vision=') .$vision }}" media="all" rel="stylesheet" type="text/css"/>
     <link href="{{asset('plugins/datatables/dataTables.bootstrap4.min.css?vision=') .$vision }}" media="all" rel="stylesheet" type="text/css"/>
     <link href="{{ asset('css/tagsinput.css?vision=') .$vision }}" media="all" rel="stylesheet" type="text/css"/>
+    <link href="{{ asset('css/dropzone.css?vision=') .$vision }}" media="all" rel="stylesheet" type="text/css"/>
     <style>
         .disableRow {
             background-color: lightslategrey;
@@ -143,13 +144,15 @@ $totalAmount = 0;
                                     @endif
                                 </div>
                                 <div class="col-md-5">
-                                    {{ Form::open(array('url' => '/admin/claim/uploadSortedFile/'.$data->id, 'method'=>'post', 'files' => true))}}
-                                    <h5 class="card-title">Tệp đã được sắp sếp</h5>
+                                    {{ Form::open(array('url' => '/admin/claim/uploadSortedFileGOP/'.$data->id, 'method'=>'post', 'files' => true))}}
+                                    <h5 class="card-title">Tệp đã được sắp sếp(Hồ sơ Gốc Scan)</h5>
                                     <div class="file-loading">
                                         <input id="url_file_sorted" type="file" name="_url_file_sorted[]" >
                                     </div>
                                     <div class="mt-2" >
-                                        <button type="submit" class="btn btn-primary " > {{__('message.save')}}</button> 
+                                        @hasanyrole('Header|Admin|AdminClaim')
+                                            <button type="submit" class="btn btn-primary " > {{__('message.save')}}</button>
+                                        @endhasanyrole
                                         {{-- <button type="button" onclick="upload_summary()" class="btn btn-primary m-2">Send to summary Etalk</button> --}}
                                     </div>
                                     <!-- End file image -->
@@ -170,11 +173,11 @@ $totalAmount = 0;
                             {{ Form::label('type',  'Claim Code', array('class' => 'col-md-4')) }}
                             {{ Form::label('type', $data->code_claim_show , array('class' => 'col-md-8')) }}
 
-                            {{ Form::label('type',  'Claim Ref No', array('class' => 'col-md-4')) }}
+                            {{ Form::label('type',  'Barcode', array('class' => 'col-md-4')) }}
                             {{ Form::label('type', $data->barcode , array('class' => 'col-md-8')) }}
 
                             {{ Form::label('type',  'Etalk Link', array('class' => 'col-md-4')) }}
-                            <a class="btn btn-primary col-md-8 " target="_blank" href="{{config('constants.url_mantic').'view.php?id='.$data->mantis_id }}">Link</a>
+                            <a class="btn btn-primary col-md-8 " target="_blank" href="{{config('constants.url_mantic').'view.php?id='.$data->barcode }}">Link</a>
 
                             {{ Form::label('type',  'HBS Link', array('class' => 'col-md-4')) }}
                             <a class="btn btn-primary col-md-4 mt-1"  href="ie:{{config('constants.url_hbs')}}/hbs/cl/ClGeneral.do?formAction=enquiry&id=clam{{$data->code_claim}}">View</a>
@@ -260,6 +263,7 @@ $totalAmount = 0;
                     
                     @foreach ($data->export_letter as $item)
                         <tr class = "{{isset($item->info['note']) ? "disableRow" : ""}} " >
+                            
                             <td>{{$item->id}}</td>
                             <td>
                                 {{$item->letter_template->name}}
@@ -292,7 +296,7 @@ $totalAmount = 0;
                                         ]) 
                                 !!}
                                 @endif
-
+                                
                                 @if(isset($item->info['notes']))
                                     <h6> Added on Etalk</h6>
                                     <span>Note Id : {{data_get($item->info, "notes.id")}}</span><br>
@@ -527,6 +531,9 @@ $totalAmount = 0;
 <script src="{{ asset('js/moment.min.js?vision=') .$vision }}"></script>
 <script src="{{ asset('js/request_form_gop.js?vision=') .$vision }}"></script>
 <script src="{{ asset('js/tagsinput.js?vision=') .$vision }}"></script>
+<script src="{{ asset('js/dropzone.min.js?vision=') .$vision }}"></script>
+<script src="{{ asset('js/DataStream.js?vision=') .$vision }}"></script>
+<script src="{{ asset('js/msg.reader.js?vision=') .$vision }}"></script>
 <script>
     
     
@@ -764,11 +771,79 @@ $totalAmount = 0;
 
         $('.app_amt_gop').val(formatPrice(prov_gop_pres_amt-sum_reject_input));
     }
+    function isSupportedFileAPI() {
+        return window.File && window.FileReader && window.FileList && window.Blob;
+    }
+
+    function parseEmail(file) {
+        if (isSupportedFileAPI()) {
+            var selectedFile = file;
+            if (!selectedFile) {
+            $('.msg-info, .incorrect-type').hide();
+            return;
+            }
+            if (selectedFile.name.indexOf('.msg') == -1) {
+            $('.msg-info').hide();
+            $('.incorrect-type').show();
+            return;
+            }
+            $('.msg-example .msg-file-name').html(selectedFile.name);
+            $('.incorrect-type').hide();
+
+            // read file...
+            var fileReader = new FileReader();
+            fileReader.onload = function (evt) {
+
+                var buffer = evt.target.result;
+                var msgReader = new MSGReader(buffer);
+                var fileData = msgReader.getFileData();
+                if (!fileData.error) {
+                    console.log(fileData.senderName);
+                    if(fileData.senderName.match(/@/g)){
+                        $('.from_email').html(fileData.senderName);
+                    }else{
+                        $('.from_email').html(fileData.senderEmail);
+                    }
+                    
+                    $('.to_email').html(jQuery.map(fileData.recipients, function (recipient, i) {
+
+                        if(recipient.name.match(/@/g)){
+                            return recipient.name;
+                        }else{
+                            return recipient.email;
+                        }
+                        
+                    }).join(','));
+                    $('.subject_email').html(fileData.subject);
+                    $('.body_email').html(fileData.body);
+                    
+
+                    // Use msgReader.getAttachment to access attachment content ...
+                    // msgReader.getAttachment(0) or msgReader.getAttachment(fileData.attachments[0])
+                } 
+                };
+            fileReader.readAsArrayBuffer(selectedFile);
+
+        } else {
+            $('.msg-example').hide();
+            $('.file-api-not-available').show();
+        }
+    };
+
     $(".disableRow").find("input,textarea,select").attr("disabled", "disabled");
-
-
+    
     $(document).ready(function () {
-        var item_of_claim = @json($data->item_of_claim);
+        
+        
+        //$("div#requestGOPForm").dropzone({url: "{{ url('admin/attachEmail') }}/{{$data->id}}"});
+        Dropzone.options.requestGOPForm = {
+            url: "{{ url('admin/attachEmail') }}/{{$data->id}}",
+            accept: function(file, done) {
+                parseEmail(file);
+            }
+        }
+
+        var item_of_claim = @json($reject_code);
         if(item_of_claim != null){
             $.each(item_of_claim, function (index, value) {
                 addInputItemReject();
@@ -878,7 +953,8 @@ $totalAmount = 0;
                 img_keywords: "happy, places"
             }
         });
-    });
-    gop_pres_amt_change();
+        });
+        gop_pres_amt_change();
+        
 </script>
 @endsection

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 function getUserSign(){ // for member claim 
     $Setting = Setting::findOrFail('1');
-    $user = User::findOrFail($Setting->manager_gop_claim[0]);
+    $user = User::findOrFail($Setting->header_claim[0]);
     $dirStorage = config('constants.signarureStorage');
     $dataImage =  $dirStorage . $user->signarure ;
     $htm = "<span><img src='{$dataImage}' alt='face' height='120' width='140'></img><br/>
@@ -22,7 +22,7 @@ function getUserSign(){ // for member claim
 
 function getUserSignThumb(){ // for provider claim
     $Setting = Setting::findOrFail('1');
-    $user = User::findOrFail($Setting->manager_gop_claim[0]);
+    $user = User::findOrFail($Setting->header_claim[0]);
     $dirStorage = config('constants.signarureStorage');
     $dataImage =  $dirStorage . $user->signarure ;
     $htm = "<span><img src='{$dataImage}' alt='face' height='73' width='100'></img><br/>
@@ -144,7 +144,7 @@ function sendEmail($user_send, $data , $template , $subject)
             'user' => $user_send, 
             'data' => $data 
         ], function ($mail) use ($user_send, $app_name, $app_email, $subject) {
-            $mail->from($app_email, $app_name)
+            $mail
                 ->to($user_send->email, $user_send->name)
                 ->subject($subject);
         }
@@ -165,7 +165,7 @@ function sendEmailProvider($user_send, $to_email , $to_name, $subject, $data , $
             'user' => $user_send, 
             'data' => isset($data) ?  $data : []
         ], function ($mail) use ($user_send, $to_email, $to_name, $subject, $app_name, $app_email, $data) {
-            $mail->from($user_send->email, $user_send->name)
+            $mail
                 ->to( $to_email)
                 ->cc([$user_send->email])
                 ->replyTo($user_send->email, $user_send->name)
@@ -353,24 +353,24 @@ function payMethod($HBS_CL_CLAIM){
     $info_reciever = "";
     $banking = "";
     $notify = "";
-    
+   
     switch ($HBS_CL_CLAIM->payMethod) {
         case 'CL_PAY_METHOD_TT':
             
             $name_reciever = $HBS_CL_CLAIM->member->cl_pay_acct_name;
             $info_reciever = 'Số tài khoản: '.$HBS_CL_CLAIM->member->cl_pay_acct_no;
-            $banking = $HBS_CL_CLAIM->member->bank_name.', '.$HBS_CL_CLAIM->member->cl_pay_bank_branch.', '. $HBS_CL_CLAIM->member->cl_pay_bank_city;
-            //$banking = $HBS_CL_CLAIM->member->BankNameChange.', '.$HBS_CL_CLAIM->member->cl_pay_bank_branch.', '. $HBS_CL_CLAIM->member->cl_pay_bank_city;
-            $notify = "Quý khách vui lòng kiểm tra tài khoản nhận tiền, số tiền thanh toán sẽ được chuyển trong 10 ngày làm việc.";
+            //$banking = $HBS_CL_CLAIM->member->bank_name.', '.$HBS_CL_CLAIM->member->cl_pay_bank_branch.', '. $HBS_CL_CLAIM->member->cl_pay_bank_city;
+            $banking = $HBS_CL_CLAIM->member->BankNameChange.', '.$HBS_CL_CLAIM->member->cl_pay_bank_branch.', '. $HBS_CL_CLAIM->member->cl_pay_bank_city;
+            $notify = "Quý khách vui lòng kiểm tra tài khoản nhận tiền sau 3-5 ngày làm việc kể từ ngày chấp nhận thanh toán.";
             $not_show_table = false;
             break;
         case 'CL_PAY_METHOD_CA':
             $name_reciever = $HBS_CL_CLAIM->member->cash_beneficiary_name;
             $info_reciever = "CMND/Căn cước công dân: " .$HBS_CL_CLAIM->member->cash_id_passport_no.', ngày cấp:  
             '.Carbon\Carbon::parse($HBS_CL_CLAIM->member->cash_id_passport_date_of_issue)->format('d/m/Y').', nơi cấp: '. $HBS_CL_CLAIM->member->cash_id_passport_issue_place;
-            $banking = $HBS_CL_CLAIM->member->cash_bank_name.', '.$HBS_CL_CLAIM->member->cash_bank_branch.', '.$HBS_CL_CLAIM->member->cash_bank_city ;
-            //$banking = $HBS_CL_CLAIM->member->CashBankNameChange.', '.$HBS_CL_CLAIM->member->cash_bank_branch.', '.$HBS_CL_CLAIM->member->cash_bank_city ;
-            $notify = "Quý khách vui lòng mang theo CMND đến Ngân hàng nhận tiền, số tiền thanh toán sẽ được chuyển trong 10 ngày làm việc.";
+            //$banking = $HBS_CL_CLAIM->member->cash_bank_name.', '.$HBS_CL_CLAIM->member->cash_bank_branch.', '.$HBS_CL_CLAIM->member->cash_bank_city ;
+            $banking = $HBS_CL_CLAIM->member->CashBankNameChange.', '.$HBS_CL_CLAIM->member->cash_bank_branch.', '.$HBS_CL_CLAIM->member->cash_bank_city ;
+            $notify = "Quý khách vui lòng mang theo CMND đến Ngân hàng nhận tiền sau 3-5 ngày làm việc kể từ ngày chấp nhận thanh toán";
             $not_show_table = false;
             break;
         case 'CL_PAY_METHOD_CQ':
@@ -571,7 +571,7 @@ function CSRRemark_TermRemark($claim){
                 $show_term[] = "<p style='text-align: justify;'><span style='font-family: arial, helvetica, sans-serif ; font-size: 11pt'>Quý khách vui lòng tham khảo Điều 2_ Các quyền lợi bảo hiểm của Quy tắc và Điều khoản bảo hiểm Chăm sóc sức khỏe:</span></p>";
                 break;
             default:
-                $show_term[] = "<p style='text-align: justify;'><span style='font-family: arial, helvetica, sans-serif ; font-size: 11pt'>Quý khách vui lòng tham khảo Điều 14_ Các định nghĩa của Quy tắc và Điều khoản bảo hiểm Chăm sóc sức khỏe:</span></p>";
+                $show_term[] = "<p style='text-align: justify;'><span style='font-family: arial, helvetica, sans-serif ; font-size: 11pt'>Quý khách vui lòng tham khảo Điều 1_ Các định nghĩa của Quy tắc và Điều khoản bảo hiểm Chăm sóc sức khỏe:</span></p>";
                 break;
         }
         $collect_value = collect($value)->sortBy('num');
@@ -606,19 +606,7 @@ function note_pay($export_letter){
 
 function datepayment(){
     $now = Carbon\Carbon::now();
-    
-    // switch ($now->dayOfWeek) {
-    //     case 5:
-    //         $now = $now->addDays(3);
-    //         break;
-    //     case 6:
-    //         $now = $now->addDays(2);
-    //         break;
-    //     default:
-    //         $now = $now->addDays(1);
-    //         break;
-    // }
-    return $now->format("d/m/Y");
+    return "Ngày ".$now->day." Tháng ".$now->month." Năm ".$now->year;
 }
 function notifi_system($content, $arrUserID = []){
     $user = App\User::findOrFail(1);
@@ -699,3 +687,29 @@ function typeGop($value){
     }
     return $rp;
 }
+
+function numberToRomanRepresentation($string) {
+    $chars = preg_split('//', $string, -1, PREG_SPLIT_NO_EMPTY);
+    $map = array('M' => 1000, 'CM' => 900, 'D' => 500, 'CD' => 400, 'C' => 100, 'XC' => 90, 'L' => 50, 'XL' => 40, 'X' => 10, 'IX' => 9, 'V' => 5, 'IV' => 4, 'I' => 1);
+    $returnValue = '';
+    foreach ($chars as $key => $number) {
+        if(is_numeric($number) && $number != 0){
+            while ($number > 0) {
+                foreach ($map as $roman => $int) {
+                    if($number >= $int) {
+                        $number -= $int;
+                        $returnValue .= $roman;
+                        break;
+                    }
+                }
+            }
+        }else{
+
+            $returnValue .= $number =='0' ? "O" : $number;
+        }
+        
+    }
+    
+    return $returnValue;
+}
+

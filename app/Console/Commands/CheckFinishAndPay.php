@@ -7,7 +7,6 @@ use App\FinishAndPay;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class CheckFinishAndPay extends Command
 {
@@ -42,20 +41,20 @@ class CheckFinishAndPay extends Command
      */
     public function handle()
     {
-        // $dt = Carbon::now();
-        // $dt_check  = $dt->subDays(10)->format('Y-m-d h:i:s');
-        // $FinishAndPay = FinishAndPay::where('notify',1)->join('claim', 'claim.id', '=', 'claim_id')->where('claim_type', 'M')->where('finished', 0)->get();
-        // $array_update = [];
-        // foreach ($FinishAndPay as $key => $value) {
-        //     $can_pay_rq = json_decode(json_encode(GetApiMantic('api/rest/plugins/apimanagement/issues/finish/'.$value->mantis_id)),true);
-        //     $can_pay_rq = data_get($can_pay_rq,'status') == 'success' ? 'success' : 'error';
-        //     if($can_pay_rq == 'success'){
-        //         $array_update[] = $value->id;
-        //     }
-        // }
-        // if(!empty($array_update)){
-        //     FinishAndPay::whereIn('id',$array_update)->update(['finished' => 1]);
-        // }
+        $dt = Carbon::now();
+        $dt_check  = $dt->subDays(10)->format('Y-m-d h:i:s');
+        $FinishAndPay = FinishAndPay::where('notify',1)->where('finished', 0)->get();
+        $array_update = [];
+        foreach ($FinishAndPay as $key => $value) {
+            $can_pay_rq = json_decode(json_encode(GetApiMantic('api/rest/plugins/apimanagement/issues/finish/'.$value->mantis_id)),true);
+            $can_pay_rq = data_get($can_pay_rq,'status') == 'success' ? 'success' : 'error';
+            if($can_pay_rq == 'success'){
+                $array_update[] = $value->id;
+            }
+        }
+        if(!empty($array_update)){
+            FinishAndPay::whereIn('id',$array_update)->update(['finished' => 1]);
+        }
         
         $non_pay = FinishAndPay::where('notify',1)->where('finished', 1)->where('payed', 0)->pluck('cl_no')->toArray();
 

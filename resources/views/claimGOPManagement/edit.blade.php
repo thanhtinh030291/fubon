@@ -47,7 +47,7 @@
                         {{ Form::text('member_name', old('member_name'), array('class' => 'member_name form-control')) }}
                         {{ Form::label('code_claim_show', 'Code Claim', array('class' => 'labelas')) }}
                         {{ Form::text('code_claim_show', old('code_claim_show'), array('class' => 'code_claim_show form-control')) }}
-                        {{ Form::label('barcode', 'Claim Ref No', array('class' => 'labelas')) }}
+                        {{ Form::label('barcode', 'Barcode', array('class' => 'labelas')) }}
                         {{ Form::text('barcode', old('barcode'), array('id'=>'barcode', 'class' => 'barcode form-control', 'required', 'readonly')) }}
                         </div>
                             </div>

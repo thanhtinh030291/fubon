@@ -17,11 +17,25 @@ class Claim extends BaseModel
         return $this->hasOne('App\HospitalRequest', 'claim_id')->orderBy('id', 'desc');
     }
 
+    public function inbox_email()
+    {
+        return $this->hasOne('App\InboxEmail', 'claim_id')->orderBy('id', 'desc');
+    }
+
+    public function report_admin()
+    {
+        return $this->hasOne('App\ReportAdmin', 'claim_id')->orderBy('id', 'desc');
+    }
+
     public function finish_and_pay()
     {
         return $this->hasOne('App\FinishAndPay', 'claim_id')->orderBy('id', 'desc');
     }
-
+    
+    public function log_unfreezed()
+    {
+        return $this->hasMany('App\LogUnfreezed', 'claim_id')->orderBy('id', 'desc');
+    }
     public function export_letter()
     {
         return $this->hasMany('App\ExportLetter', 'claim_id')->orderBy('id', 'desc');
@@ -58,6 +72,21 @@ class Claim extends BaseModel
         $csr  = HBS_SY_RPT_IDX::where('rpct_oid','like','%CLSETTRPT%')->where('idx_val',"like","%{$this->code_claim_show}%")->orderBy('upd_date', 'DESC')->get();
         
         return $csr;
+    }
+
+    //get reject code hbs
+    public function getRejectCodeAttribute(){
+        $condition_re = function ($q){
+            $q->selectRaw("fn_get_sys_code_desc_vn(SCMA_OID_CL_REJ_CODE) content, rej_amt amount , (null) id , clli_oid");
+        };
+
+        $condition = function ($q) use ($condition_re){
+            $q->with(['HBS_CL_LINE_REJ' => $condition_re]);
+        };
+        $HBS_CL_CLAIM = HBS_CL_CLAIM::with(['HBS_CL_LINE' => $condition])->findOrFail($this->code_claim);
+        
+        
+        return $HBS_CL_CLAIM->HBS_CL_LINE->pluck('HBS_CL_LINE_REJ')->toArray();
     }
 
     public static function storeFile($file ,  $dirUpload){
