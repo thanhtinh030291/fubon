@@ -348,7 +348,7 @@ class ClaimController extends Controller
             $payment_history = data_get($payment_history_cps,'data_full',[]);
             $approve_amt = data_get($payment_history_cps,'approve_amt');
             $present_amt = data_get($payment_history_cps,'present_amt');
-            $payment_method = $claim_type == "P" ? "TT" :  data_get($payment_history_cps,'payment_method');
+            $payment_method = $claim_type == "P" ? "TT" :  str_replace("CL_PAYMENT_METHOD_","",data_get($payment_history_cps,'payment_method'));
             $pocy_no = data_get($payment_history_cps,'pocy_ref_no');
             $memb_no = data_get($payment_history_cps,'memb_ref_no');
             $member_name = data_get($payment_history_cps,'member_name');
