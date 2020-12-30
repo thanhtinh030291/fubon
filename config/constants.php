@@ -62,7 +62,7 @@ return[
     'url_mantic' => 'https://uat-etalk.pacificcross.com.vn/',
     'url_mantic_api' => 'https://uat-etalk.pacificcross.com.vn/',
     'url_cps' => 'https://cpsfubon.pacificcross.com.vn/index.php/',
-    'api_cps' => 'https://cpsfunbon.pacificcross.com.vn/index.php/api/',
+    'api_cps' => 'https://cpsfubon.pacificcross.com.vn/index.php/api/',
     'client_id' => 'ul-2l44e7vq-3t8m-4fqeaxi-6olcepgxweq',
     'client_secret' => 'ukbg95yi3ifcdjiso5rc7kcjqeetxpfv',
     'url_hbs' => 'http://192.168.0.221:8030/',
