@@ -562,7 +562,22 @@ function CSRRemark_TermRemark($claim){
     $TermRemark = collect($TermRemark)->sortBy('group')->groupBy('group');
     $show_term = [];
     foreach ($TermRemark as $key => $value) {
-        $show_term[] = "<p style='text-align: justify;'><span style='font-family: arial, helvetica, sans-serif ; font-size: 11pt'>Quý khách vui lòng tham khảo các định nghĩa của Quy tắc và Điều khoản bảo hiểm Chăm sóc sức khỏe:</span></p>";
+        
+        switch ($key) {
+            case '12':
+                $show_term[] = "<p style='text-align: justify;'><span style='font-family: arial, helvetica, sans-serif ; font-size: 11pt'>Quý khách vui lòng tham khảo Điều 12_ Các loại trừ trách nhiệm bảo hiểm:</span></p>
+                <p style='text-align: justify;'><span style='font-family: arial, helvetica, sans-serif ; font-size: 11pt'>Những hoạt động chẩn đoán, xét nghiệm, điều trị, liên quan đến ốm đau bệnh tật, tai nạn, tử vong, thương tật phát sinh chi phí liên quan sẽ không được Fubon chi trả theo quy tắc này, bao gồm:</p>
+                ";
+                break;
+            case '16':
+                    $show_term[] = "<p style='text-align: justify;'><span style='font-family: arial, helvetica, sans-serif ; font-size: 11pt'>Quý khách vui lòng tham khảo Điều 16_ Các giới hạn và loại trừ:</span></p>
+                    <p style='text-align: justify;'><span style='font-family: arial, helvetica, sans-serif ; font-size: 11pt'>Những hoạt động chẩn đoán, xét nghiệm, điều trị, liên quan đến ốm đau bệnh tật, tai nạn, tử vong, thương tật phát sinh chi phí liên quan sẽ không được chi trả theo hợp đồng này, bao gồm:</p>
+                    ";
+                    break;
+            default:
+                $show_term[] = "<p style='text-align: justify;'><span style='font-family: arial, helvetica, sans-serif ; font-size: 11pt'>Quý khách vui lòng tham khảo các định nghĩa của Quy tắc và Điều khoản bảo hiểm Chăm sóc sức khỏe:</span></p>";
+                break;
+        }
         $collect_value = collect($value)->sortBy('num');
         foreach ($collect_value as $key_c => $value_c) {
             $show_term[] = $value_c['content'];
